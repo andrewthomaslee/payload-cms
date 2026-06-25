@@ -43,31 +43,6 @@ jobs:
           auth-client-secret: ${{ secrets.CF_WARP_CLIENT_SECRET }}
           test-connection: false
 
-      - name: Generate build-time .env
-        id: gen-env
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
-          NEXT_PUBLIC_SERVER_URL: ${{ vars.NEXT_PUBLIC_SERVER_URL }}
-        run: |
-          set -euo pipefail
-          ENV_FILE="$(mktemp build-env.XXXXXX)"
-          {
-          echo "DATABASE_URL=${DATABASE_URL}"
-          echo "PAYLOAD_SECRET=${PAYLOAD_SECRET}"
-          echo "CRON_SECRET=${CRON_SECRET}"
-          echo "PREVIEW_SECRET=${PREVIEW_SECRET}"
-          echo "NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL:-http://localhost:3000}"
-          } > "$ENV_FILE"
-          test -s "$ENV_FILE"
-          printf 'env-file=%s\n' "$ENV_FILE" >> "$GITHUB_OUTPUT"
-
-      - name: Clean up build-time .env
-        if: always()
-        run: rm -f "${{ steps.gen-env.outputs.env-file }}"
-
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v6.1.0
@@ -84,14 +59,20 @@ jobs:
       - name: Build and push
         id: build
         uses: docker/build-push-action@v7.2.0
+        env:
+          BUILD_ENV_FILE: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            PAYLOAD_SECRET=${{ secrets.PAYLOAD_SECRET }}
+            CRON_SECRET=${{ secrets.CRON_SECRET }}
+            PREVIEW_SECRET=${{ secrets.PREVIEW_SECRET }}
+            NEXT_PUBLIC_SERVER_URL=${{ vars.NEXT_PUBLIC_SERVER_URL }}
         with:
           context: .
           file: ./Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          secret-files: |
-            env-file=${{ steps.gen-env.outputs.env-file }}
+          secret-envs: env-file=BUILD_ENV_FILE
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v4.1.2
