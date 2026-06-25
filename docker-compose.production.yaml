@@ -1,6 +1,7 @@
 services:
   payload-cms:
-    image: payload-cms:latest
+    image: ghcr.io/andrewthomaslee/payload-cms/site:latest
+    pull_policy: always
     container_name: payload-cms
     network_mode: host
     restart: unless-stopped
