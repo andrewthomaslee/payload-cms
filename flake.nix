@@ -1,5 +1,5 @@
 {
-  description = "payload-cms";
+  description = "payload-cms repo";
 
   # Flake inputs
   inputs = {
