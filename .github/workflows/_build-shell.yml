@@ -1,7 +1,7 @@
 name: Reusable Build Site
 on: workflow_call
 jobs:
-  build-site:
+  build-shell:
     runs-on: ubuntu-latest
     permissions:
       id-token: write

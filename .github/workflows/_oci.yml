@@ -7,7 +7,7 @@ on:
         required: false
         type: string
 jobs:
-  oci:
+  build-and-push:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
