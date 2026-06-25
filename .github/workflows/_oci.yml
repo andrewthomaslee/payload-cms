@@ -104,5 +104,6 @@ jobs:
       - name: Sign the images with GitHub OIDC Token
         env:
           IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+          IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/payload-cms/site
         run: |
-          cosign sign --yes "${IMAGE_DIGEST}"
+          cosign sign --yes "${IMAGE_NAME}@${IMAGE_DIGEST}"
