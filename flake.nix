@@ -38,6 +38,7 @@
             jq
             nodejs
             bun
+            pnpm
             mongodb-compass
           ];
 
