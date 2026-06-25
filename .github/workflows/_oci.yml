@@ -29,7 +29,7 @@ jobs:
       - uses: NX1X/cloudflare-warp-action@v1
         name: Install WARP
         with:
-          organization: ${{ secrets.CF_WARP_ORG }}
+          organization: ${{ vars.CF_WARP_ORG }}
           auth-client-id: ${{ secrets.CF_WARP_CLIENT_ID }}
           auth-client-secret: ${{ secrets.CF_WARP_CLIENT_SECRET }}
 
