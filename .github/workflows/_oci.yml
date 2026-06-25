@@ -32,6 +32,7 @@ jobs:
           organization: ${{ vars.CF_WARP_ORG }}
           auth-client-id: ${{ secrets.CF_WARP_CLIENT_ID }}
           auth-client-secret: ${{ secrets.CF_WARP_CLIENT_SECRET }}
+          test-connection: false
 
       - name: Docker Build
         run: |
