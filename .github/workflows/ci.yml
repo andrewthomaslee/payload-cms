@@ -1,0 +1,17 @@
+name: CI
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  flake-check:
+    uses: ./.github/workflows/_flake-check.yml
