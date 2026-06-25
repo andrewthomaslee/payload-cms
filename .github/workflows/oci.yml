@@ -7,25 +7,13 @@ permissions:
   pages: write
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  pre-flight:
-    uses: ./.github/workflows/_flake-check.yml
-
-  shell:
-    needs: pre-flight
-    uses: ./.github/workflows/_build-shell.yml
-
-  flakehub:
-    needs: shell
-    uses: ./.github/workflows/_flakehub.yml
-
   tag:
-    needs: flakehub
     uses: ./.github/workflows/_release.yml
-    with:
-      release: true
     secrets: inherit
 
   push:

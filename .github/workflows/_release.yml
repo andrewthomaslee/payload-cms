@@ -5,6 +5,11 @@ on:
       tag:
         description: "The generated release tag"
         value: ${{ jobs.release.outputs.tag }}
+    inputs:
+      release:
+        description: 'Make a git release'
+        required: false
+        type: boolean
 
 jobs:
   release:
@@ -38,6 +43,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub release
+        if: ${{ inputs.release == true }}
         uses: softprops/action-gh-release@v3.0.0
         with:
           tag_name: ${{ steps.semver.outputs.tag }}
