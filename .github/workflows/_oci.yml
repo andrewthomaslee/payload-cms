@@ -15,6 +15,7 @@ on:
         required: true
       PREVIEW_SECRET:
         required: true
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -45,16 +46,8 @@ jobs:
             type=raw,value=${{ inputs.tag }}
           flavor: latest=auto
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4.1.0
-        with:
-          # Create a builder with host network capability
-          driver-opts: |
-            network=host
-          buildkitd-flags: --allow-insecure-entitlement network.host
-
-      - uses: NX1X/cloudflare-warp-action@v1
-        name: Install WARP
+      - name: Install WARP
+        uses: NX1X/cloudflare-warp-action@v1
         with:
           organization: ${{ vars.CF_WARP_ORG }}
           auth-client-id: ${{ secrets.CF_WARP_CLIENT_ID }}
@@ -63,6 +56,27 @@ jobs:
 
       - name: Test Connection
         run: curl whoami.whoami.svc.cluster.local
+
+      # Add host DNS (which now includes WARP) into BuildKit
+      - name: Discover Host DNS Namespace
+        id: dns-discovery
+        run: |
+          NAMESERVER=$(grep nameserver /etc/resolv.conf | awk '{print $2}' | head -n 1)
+          echo "nameserver=$NAMESERVER" >> $GITHUB_OUTPUT
+
+      # Initialize Buildx WITH the explicitly declared DNS mapping
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.1.0
+        with:
+          driver-opts: |
+            network=host
+          buildkitd-flags: |
+            --allow-insecure-entitlement network.host
+          # Directs the inner build container to use the host's WARP DNS adapter
+          config-inline: |
+            [worker.oci]
+              dns-search = ["cluster.local"]
+              dns-nameservers = ["${{ steps.dns-discovery.outputs.nameserver }}"]
 
       - name: Build and push
         id: build
