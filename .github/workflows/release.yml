@@ -17,8 +17,12 @@ jobs:
     needs: pre-flight
     uses: ./.github/workflows/_build-site.yml
 
+  shell:
+    needs: pre-flight
+    uses: ./.github/workflows/_build-shell.yml
+
   flakehub:
-    needs: [build]
+    needs: [build, shell]
     uses: ./.github/workflows/_flakehub.yml
 
   tag:

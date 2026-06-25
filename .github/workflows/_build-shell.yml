@@ -1,0 +1,19 @@
+name: Reusable Build Site
+on: workflow_call
+jobs:
+  build-site:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          persist-credentials: true
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
+
+      - name: Build Site
+        run: nix build .#devShells.x86_64-linux.default --show-trace
