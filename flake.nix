@@ -53,6 +53,7 @@
 
             eval "$(bunx varlock load --format shell --path "$REPO_ROOT"/.env)"
             bun install
+            echo "Enjoy!"
           '';
         };
       });
