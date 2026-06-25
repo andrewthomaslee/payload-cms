@@ -1,0 +1,18 @@
+services:
+  payload-cms:
+    image: payload-cms:latest
+    container_name: payload-cms
+    network_mode: host
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+    volumes:
+      - media:/app/public/media
+      - nextcache:/app/.next/cache
+
+volumes:
+  media:
+  nextcache:
