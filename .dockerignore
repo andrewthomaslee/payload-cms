@@ -3,8 +3,7 @@ dist / media
 node_modules
 .DS_Store
 .env
-!.env.example
-!.env.schema
+.env.*
 .next
 next-env.d.ts
 .vercel
@@ -22,3 +21,16 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# other
+.github/
+.direnv/
+.next/
+.gitignore
+.editorconfig
+result
+README.md
+flake.nix
+flake.lock
+Dockerfile
+docker-compose.yml
