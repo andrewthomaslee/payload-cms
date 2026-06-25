@@ -47,15 +47,15 @@ jobs:
           flavor: latest=auto
 
       - name: Install WARP
-        uses: NX1X/cloudflare-warp-action@v1
+        uses: Boostport/setup-cloudflare-warp@v1
         with:
           organization: ${{ vars.CF_WARP_ORG }}
-          auth-client-id: ${{ secrets.CF_WARP_CLIENT_ID }}
-          auth-client-secret: ${{ secrets.CF_WARP_CLIENT_SECRET }}
-          test-connection: false
+          auth_client_id: ${{ secrets.CF_WARP_CLIENT_ID }}
+          auth_client_secret: ${{ secrets.CF_WARP_CLIENT_SECRET }}
+          configure_docker_dns: true
 
       - name: Test Connection
-        run: curl whoami.whoami.svc.cluster.local
+        run: curl --retry 3 --retry-delay 5 --max-time 10 whoami.whoami.svc.cluster.local
 
       # Add host DNS (which now includes WARP) into BuildKit
       - name: Discover Host DNS Namespace
@@ -73,7 +73,7 @@ jobs:
           buildkitd-flags: |
             --allow-insecure-entitlement network.host
           # Directs the inner build container to use the host's WARP DNS adapter
-          config-inline: |
+          buildkitd-config-inline: |
             [worker.oci]
               dns-search = ["cluster.local"]
               dns-nameservers = ["${{ steps.dns-discovery.outputs.nameserver }}"]
