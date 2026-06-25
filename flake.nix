@@ -38,8 +38,6 @@
             jq
             nodejs
             bun
-            pnpm
-            podman
             mongodb-compass
           ];
 
