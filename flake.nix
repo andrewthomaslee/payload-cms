@@ -34,6 +34,7 @@
         default = mkShell {
           # Pinned packages available in the environment
           packages = [
+            bash
             jq
             nodejs
             bun
@@ -51,6 +52,9 @@
           shellHook = ''
             export REPO_ROOT
             REPO_ROOT=$(git rev-parse --show-toplevel)
+
+            eval "$(bunx varlock load --format shell --path "$REPO_ROOT"/.env)"
+            bun install
           '';
         };
       });
