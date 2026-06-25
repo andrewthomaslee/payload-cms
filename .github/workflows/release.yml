@@ -13,19 +13,22 @@ jobs:
   pre-flight:
     uses: ./.github/workflows/_flake-check.yml
 
-  build:
-    needs: pre-flight
-    uses: ./.github/workflows/_build-site.yml
-
   shell:
     needs: pre-flight
     uses: ./.github/workflows/_build-shell.yml
 
   flakehub:
-    needs: [build, shell]
+    needs: shell
     uses: ./.github/workflows/_flakehub.yml
 
   tag:
-    needs: [flakehub]
+    needs: flakehub
     uses: ./.github/workflows/_release.yml
+    secrets: inherit
+
+  push:
+    needs: tag
+    uses: ./.github/workflows/_oci.yml
+    with:
+      tag: ${{ needs.tag.outputs.tag }}
     secrets: inherit
