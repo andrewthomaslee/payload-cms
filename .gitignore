@@ -4,6 +4,7 @@ node_modules
 .DS_Store
 .env
 !.env.example
+!.env.schema
 .next
 next-env.d.ts
 .vercel
@@ -21,3 +22,8 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# nix
+result
+.direnv
+.devenv
