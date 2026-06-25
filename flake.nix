@@ -20,6 +20,7 @@
       nixpkgs.lib.genAttrs supportedSystems (system:
         f {
           pkgs = import nixpkgs {inherit system;};
+          config.allowUnfree = true;
         });
   in {
     # Schemas tell Nix about the structure of your flake's outputs
@@ -33,6 +34,10 @@
           packages = [
             jq
             nodejs
+            bun
+            pnpm
+            podman
+            mongodb-compass
           ];
 
           # Environment variables
