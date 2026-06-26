@@ -54,7 +54,7 @@
             REPO_ROOT=$(git rev-parse --show-toplevel)
 
             eval "$(bunx varlock load --format shell --path "$REPO_ROOT"/.env)"
-            bun install
+            pnpm install
             echo "Enjoy!"
           '';
         };
