@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   labels:
     io.kompose.service: payload-cms
@@ -10,7 +10,6 @@ spec:
   selector:
     matchLabels:
       io.kompose.service: payload-cms
-  serviceName: payload-cms
   template:
     metadata:
       labels:
@@ -56,6 +55,7 @@ spec:
           volumeMounts:
             - mountPath: /app/public/media
               name: payload-cms-media
+              subPath: media
             - mountPath: /app/.next/cache
               name: payload-cms-cache
       restartPolicy: Always

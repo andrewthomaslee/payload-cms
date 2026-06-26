@@ -3,5 +3,5 @@ resources:
   - payload-cms-media-persistentvolumeclaim.yaml
   - payload-cms-namespace.yaml
   - payload-cms-service.yaml
-  - payload-cms-statefulset.yaml
+  - payload-cms-deployment.yaml
   - env-sealed-secret.yaml

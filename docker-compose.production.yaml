@@ -16,22 +16,22 @@ services:
       - payload-cms-media:/app/public/media
       - payload-cms-cache:/app/.next/cache
     labels:
-      - "kompose.controller.type=statefulset"
-      - "kompose.service.expose=andrewlee.fun"
-      - "kompose.service.expose.ingress-class-name=traefik"
-      - "kompose.service.group=payload-cms"
-      - "kompose.service.healthcheck.liveness.http_get_path=/health"
-      - "kompose.service.healthcheck.liveness.tcp_port=3000"
-      - "kompose.service.healthcheck.readiness.http_get_path=/ready"
-      - "kompose.service.healthcheck.readiness.http_get_port=3000"
-      - "kompose.service.healthcheck.readiness.interval=60s"
-      - "kompose.service.healthcheck.readiness.retries=5"
-      - "kompose.service.healthcheck.readiness.start_period=60s"
-      - "kompose.service.healthcheck.readiness.tcp_port=3000"
-      - "kompose.service.healthcheck.readiness.timeout=30s"
-      - "kompose.service.type=clusterip"
-      - "kompose.volume.size=10Gi"
-      
+      - 'kompose.controller.type=deployment'
+      - 'kompose.service.expose=andrewlee.fun'
+      - 'kompose.service.expose.ingress-class-name=traefik'
+      - 'kompose.service.group=payload-cms'
+      - 'kompose.service.healthcheck.liveness.http_get_path=/health'
+      - 'kompose.service.healthcheck.liveness.tcp_port=3000'
+      - 'kompose.service.healthcheck.readiness.http_get_path=/ready'
+      - 'kompose.service.healthcheck.readiness.http_get_port=3000'
+      - 'kompose.service.healthcheck.readiness.interval=60s'
+      - 'kompose.service.healthcheck.readiness.retries=5'
+      - 'kompose.service.healthcheck.readiness.start_period=60s'
+      - 'kompose.service.healthcheck.readiness.tcp_port=3000'
+      - 'kompose.service.healthcheck.readiness.timeout=30s'
+      - 'kompose.service.type=clusterip'
+      - 'kompose.volume.size=10Gi'
+
 volumes:
   payload-cms-media:
   payload-cms-cache:
