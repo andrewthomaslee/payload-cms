@@ -1,4 +1,4 @@
-name: Release
+name: OCI
 
 permissions:
   id-token: write
@@ -15,6 +15,8 @@ jobs:
   tag:
     uses: ./.github/workflows/_release.yml
     secrets: inherit
+    with:
+      release: true
 
   push:
     needs: tag
