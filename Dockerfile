@@ -43,6 +43,10 @@ RUN adduser --system --uid 1001 nextjs
 # Remove this line if you do not have this folder
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
+# Create media directory with correct permissions so the Docker named volume
+# inherits nextjs:nodejs ownership when first mounted.
+RUN mkdir -p /app/public/media && chown nextjs:nodejs /app/public/media
+
 # Create .next and .next/cache with correct permissions.
 # This ensures Docker named volumes inherit the correct ownership
 # when mounted at /app/.next/cache, preventing EACCES errors.
