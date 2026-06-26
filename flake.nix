@@ -34,11 +34,11 @@
         default = mkShell {
           # Pinned packages available in the environment
           packages = [
+            pnpm_10
+            nodejs_22
+            bun
             bash
             jq
-            nodejs
-            bun
-            pnpm
             mongodb-compass
             kompose
           ];
