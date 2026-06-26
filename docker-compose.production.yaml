@@ -32,7 +32,6 @@ services:
       - "kompose.service.type=clusterip"
       - "kompose.volume.size=16Gi"
       - "kompose.volume.storage-class-name=longhorn"
-      - "kompose.volume.subpath=app"
       - "kompose.volume.type=persistentVolumeClaim"
       
 volumes:

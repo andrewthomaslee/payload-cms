@@ -21,7 +21,6 @@ metadata:
     kompose.version: 1.38.0 (HEAD)
     kompose.volume.size: 16Gi
     kompose.volume.storage-class-name: longhorn
-    kompose.volume.subpath: /app
     kompose.volume.type: persistentVolumeClaim
   labels:
     io.kompose.service: payload-cms
