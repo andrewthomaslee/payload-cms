@@ -47,7 +47,7 @@ spec:
             - name: NODE_ENV
               value: production
           envFrom:
-            - configMapRef:
+            - secretRef:
                 name: env
           image: ghcr.io/andrewthomaslee/payload-cms/site:latest
           imagePullPolicy: Always
