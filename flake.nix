@@ -41,6 +41,7 @@
             jq
             mongodb-compass
             kompose
+            kubeseal
           ];
 
           # Environment variables
@@ -59,5 +60,16 @@
           '';
         };
       });
+
+    apps = forEachSupportedSystem ({pkgs}: {
+      default = let
+        kompose-convert = pkgs.writeShellScriptBin "kompose-convert" ''
+          rm -fr "$REPO_ROOT"/kubernetes && mkdir -p "$REPO_ROOT"/kubernetes && ${pkgs.kompose}/bin/kompose --file docker-compose.production.yaml convert --out "$REPO_ROOT"/kubernetes/
+        '';
+      in {
+        type = "app";
+        program = "${kompose-convert}/bin/kompose-convert";
+      };
+    });
   };
 }

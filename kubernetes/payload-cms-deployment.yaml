@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /nix/store/s9ggddb4w8h8541qk8wv0f51zz5x7f4w-kompose-1.38.0/bin/kompose --file docker-compose.production.yaml convert --out /home/netsa/Desktop/github/andrewthomaslee/payload-cms/kubernetes/
+    kompose.controller.type: deployment
+    kompose.hpa.cpu: "85"
+    kompose.hpa.memory: "70"
+    kompose.hpa.replicas.max: "5"
+    kompose.hpa.replicas.min: "1"
+    kompose.image-pull-policy: Always
+    kompose.service.expose: andrewlee.fun
+    kompose.service.expose.ingress-class-name: traefik
+    kompose.service.group: payload-cms
+    kompose.service.healthcheck.liveness.http_get_path: /health
+    kompose.service.healthcheck.liveness.tcp_port: "3000"
+    kompose.service.healthcheck.readiness.http_get_path: /ready
+    kompose.service.healthcheck.readiness.http_get_port: "3000"
+    kompose.service.healthcheck.readiness.interval: 60s
+    kompose.service.healthcheck.readiness.retries: "5"
+    kompose.service.healthcheck.readiness.start_period: 60s
+    kompose.service.healthcheck.readiness.tcp_port: "3000"
+    kompose.service.healthcheck.readiness.timeout: 30s
+    kompose.service.type: clusterip
+    kompose.version: 1.38.0 (HEAD)
+    kompose.volume.size: 8Gi
+    kompose.volume.storage-class-name: longhorn
+    kompose.volume.subpath: /app
+    kompose.volume.type: persistentVolumeClaim
+  labels:
+    io.kompose.service: payload-cms
+  name: payload-cms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: payload-cms
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /nix/store/s9ggddb4w8h8541qk8wv0f51zz5x7f4w-kompose-1.38.0/bin/kompose --file docker-compose.production.yaml convert --out /home/netsa/Desktop/github/andrewthomaslee/payload-cms/kubernetes/
+        kompose.controller.type: deployment
+        kompose.hpa.cpu: "85"
+        kompose.hpa.memory: "70"
+        kompose.hpa.replicas.max: "5"
+        kompose.hpa.replicas.min: "1"
+        kompose.image-pull-policy: Always
+        kompose.service.expose: andrewlee.fun
+        kompose.service.expose.ingress-class-name: traefik
+        kompose.service.group: payload-cms
+        kompose.service.healthcheck.liveness.http_get_path: /health
+        kompose.service.healthcheck.liveness.tcp_port: "3000"
+        kompose.service.healthcheck.readiness.http_get_path: /ready
+        kompose.service.healthcheck.readiness.http_get_port: "3000"
+        kompose.service.healthcheck.readiness.interval: 60s
+        kompose.service.healthcheck.readiness.retries: "5"
+        kompose.service.healthcheck.readiness.start_period: 60s
+        kompose.service.healthcheck.readiness.tcp_port: "3000"
+        kompose.service.healthcheck.readiness.timeout: 30s
+        kompose.service.type: clusterip
+        kompose.version: 1.38.0 (HEAD)
+        kompose.volume.size: 8Gi
+        kompose.volume.storage-class-name: longhorn
+        kompose.volume.subpath: /app
+        kompose.volume.type: persistentVolumeClaim
+      labels:
+        io.kompose.service: payload-cms
+    spec:
+      containers:
+        - env:
+            - name: HOSTNAME
+              value: 0.0.0.0
+            - name: NODE_ENV
+              value: production
+          envFrom:
+            - configMapRef:
+                name: env
+          image: ghcr.io/andrewthomaslee/payload-cms/site:latest
+          imagePullPolicy: Always
+          name: payload-cms
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /ready
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 30
+          volumeMounts:
+            - mountPath: /app
+              name: payload-cms
+              subPath: /app
+      restartPolicy: Always
+      volumes:
+        - name: payload-cms
+          persistentVolumeClaim:
+            claimName: payload-cms

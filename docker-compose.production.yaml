@@ -4,16 +4,41 @@ services:
     pull_policy: always
     container_name: payload-cms
     network_mode: host
-    restart: unless-stopped
+    restart: always
+    ports:
+      - 3000:3000
     env_file:
       - .env
     environment:
       - NODE_ENV=production
       - HOSTNAME=0.0.0.0
     volumes:
-      - media:/app/public/media
-      - nextcache:/app/.next/cache
+      - payload-cms:/app
+    labels:
+      - "kompose.controller.type=deployment"
+      - "kompose.hpa.cpu=85"
+      - "kompose.hpa.memory=70"
+      - "kompose.hpa.replicas.max=5"
+      - "kompose.hpa.replicas.min=1"
+      - "kompose.image-pull-policy=Always"
+      - "kompose.service.expose=andrewlee.fun"
+      - "kompose.service.expose.ingress-class-name=traefik"
+      - "kompose.service.group=payload-cms"
+      - "kompose.service.healthcheck.liveness.http_get_path=/health"
+      - "kompose.service.healthcheck.liveness.tcp_port=3000"
+      - "kompose.service.healthcheck.readiness.http_get_path=/ready"
+      - "kompose.service.healthcheck.readiness.http_get_port=3000"
+      - "kompose.service.healthcheck.readiness.interval=60s"
+      - "kompose.service.healthcheck.readiness.retries=5"
+      - "kompose.service.healthcheck.readiness.start_period=60s"
+      - "kompose.service.healthcheck.readiness.tcp_port=3000"
+      - "kompose.service.healthcheck.readiness.timeout=30s"
+      - "kompose.service.type=clusterip"
+      - "kompose.volume.size=8Gi"
+      - "kompose.volume.storage-class-name=longhorn"
+      - "kompose.volume.subpath=/app"
+      - "kompose.volume.type=persistentVolumeClaim"
+      
 
 volumes:
-  media:
-  nextcache:
+  payload-cms:

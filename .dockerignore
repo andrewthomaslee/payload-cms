@@ -34,3 +34,4 @@ flake.nix
 flake.lock
 Dockerfile
 docker-compose.yml
+kubernetes/

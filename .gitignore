@@ -27,3 +27,6 @@ node_modules/
 result
 .direnv
 .devenv
+
+# compose
+kubernetes/env-configmap.yaml
