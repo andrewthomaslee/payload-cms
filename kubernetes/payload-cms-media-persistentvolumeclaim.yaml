@@ -2,13 +2,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    io.kompose.service: payload-cms
-  name: payload-cms
+    io.kompose.service: payload-cms-media
+  name: payload-cms-media
   namespace: payload-cms
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
-      storage: 16Gi
-  storageClassName: longhorn
+      storage: 10Gi

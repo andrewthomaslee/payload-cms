@@ -4,7 +4,6 @@ metadata:
   annotations:
     kompose.cmd: /nix/store/s9ggddb4w8h8541qk8wv0f51zz5x7f4w-kompose-1.38.0/bin/kompose --namespace payload-cms --file docker-compose.production.yaml convert --out /home/netsa/Desktop/github.com/andrewthomaslee/payload-cms/kubernetes/
     kompose.controller.type: statefulset
-    kompose.image-pull-policy: Always
     kompose.service.expose: andrewlee.fun
     kompose.service.expose.ingress-class-name: traefik
     kompose.service.group: payload-cms
@@ -19,9 +18,7 @@ metadata:
     kompose.service.healthcheck.readiness.timeout: 30s
     kompose.service.type: clusterip
     kompose.version: 1.38.0 (HEAD)
-    kompose.volume.size: 16Gi
-    kompose.volume.storage-class-name: longhorn
-    kompose.volume.type: persistentVolumeClaim
+    kompose.volume.size: 10Gi
   labels:
     io.kompose.service: payload-cms
   name: payload-cms

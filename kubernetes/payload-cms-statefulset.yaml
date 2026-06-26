@@ -4,24 +4,21 @@ metadata:
   annotations:
     kompose.cmd: /nix/store/s9ggddb4w8h8541qk8wv0f51zz5x7f4w-kompose-1.38.0/bin/kompose --namespace payload-cms --file docker-compose.production.yaml convert --out /home/netsa/Desktop/github.com/andrewthomaslee/payload-cms/kubernetes/
     kompose.controller.type: statefulset
-    kompose.image-pull-policy: Always
     kompose.service.expose: andrewlee.fun
     kompose.service.expose.ingress-class-name: traefik
     kompose.service.group: payload-cms
     kompose.service.healthcheck.liveness.http_get_path: /health
-    kompose.service.healthcheck.liveness.tcp_port: "3000"
+    kompose.service.healthcheck.liveness.tcp_port: '3000'
     kompose.service.healthcheck.readiness.http_get_path: /ready
-    kompose.service.healthcheck.readiness.http_get_port: "3000"
+    kompose.service.healthcheck.readiness.http_get_port: '3000'
     kompose.service.healthcheck.readiness.interval: 60s
-    kompose.service.healthcheck.readiness.retries: "5"
+    kompose.service.healthcheck.readiness.retries: '5'
     kompose.service.healthcheck.readiness.start_period: 60s
-    kompose.service.healthcheck.readiness.tcp_port: "3000"
+    kompose.service.healthcheck.readiness.tcp_port: '3000'
     kompose.service.healthcheck.readiness.timeout: 30s
     kompose.service.type: clusterip
     kompose.version: 1.38.0 (HEAD)
-    kompose.volume.size: 16Gi
-    kompose.volume.storage-class-name: longhorn
-    kompose.volume.type: persistentVolumeClaim
+    kompose.volume.size: 10Gi
   labels:
     io.kompose.service: payload-cms
   name: payload-cms
@@ -46,9 +43,7 @@ spec:
           envFrom:
             - secretRef:
                 name: env
-                namespace: payload-cms
           image: ghcr.io/andrewthomaslee/payload-cms/site:latest
-          imagePullPolicy: Always
           name: payload-cms
           ports:
             - containerPort: 3000
@@ -56,28 +51,20 @@ spec:
           readinessProbe:
             failureThreshold: 5
             httpGet:
-              path: /ready
+              path: /
               port: 3000
             initialDelaySeconds: 60
             periodSeconds: 60
             timeoutSeconds: 30
           volumeMounts:
-            - mountPath: /app
-              name: payload-cms
+            - mountPath: /app/public/media
+              name: payload-cms-media
+            - mountPath: /app/.next/cache
+              name: payload-cms-cache
       restartPolicy: Always
       volumes:
-        - name: payload-cms
+        - name: payload-cms-media
           persistentVolumeClaim:
-            claimName: payload-cms
-  volumeClaimTemplates:
-    - metadata:
-        labels:
-          io.kompose.service: payload-cms
-        name: payload-cms
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 16Gi
-        storageClassName: longhorn
+            claimName: payload-cms-media
+        - name: payload-cms-cache
+          emptyDir: {}

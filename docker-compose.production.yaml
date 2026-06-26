@@ -13,10 +13,10 @@ services:
       - NODE_ENV=production
       - HOSTNAME=0.0.0.0
     volumes:
-      - payload-cms:/app
+      - payload-cms-media:/app/public/media
+      - payload-cms-cache:/app/.next/cache
     labels:
       - "kompose.controller.type=statefulset"
-      - "kompose.image-pull-policy=Always"
       - "kompose.service.expose=andrewlee.fun"
       - "kompose.service.expose.ingress-class-name=traefik"
       - "kompose.service.group=payload-cms"
@@ -30,9 +30,8 @@ services:
       - "kompose.service.healthcheck.readiness.tcp_port=3000"
       - "kompose.service.healthcheck.readiness.timeout=30s"
       - "kompose.service.type=clusterip"
-      - "kompose.volume.size=16Gi"
-      - "kompose.volume.storage-class-name=longhorn"
-      - "kompose.volume.type=persistentVolumeClaim"
+      - "kompose.volume.size=10Gi"
       
 volumes:
-  payload-cms:
+  payload-cms-media:
+  payload-cms-cache:
