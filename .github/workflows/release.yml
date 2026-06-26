@@ -28,7 +28,7 @@ jobs:
     needs: tag
     uses: ./.github/workflows/_oci-manifests.yml
     with:
-      tag: ${{ needs.tag.outputs.tag }}
+      tag: release
     secrets: inherit
 
   flakehub:
