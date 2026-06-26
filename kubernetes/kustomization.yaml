@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - env-sealed.yaml
+  - payload-cms-namespace.yaml
+  - payload-cms-service.yaml
+  - payload-cms-ingress.yaml
+  - payload-cms-statefulset.yaml
