@@ -46,6 +46,7 @@ spec:
           envFrom:
             - secretRef:
                 name: env
+                namespace: payload-cms
           image: ghcr.io/andrewthomaslee/payload-cms/site:latest
           imagePullPolicy: Always
           name: payload-cms
