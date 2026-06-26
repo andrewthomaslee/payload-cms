@@ -40,6 +40,7 @@
             bun
             pnpm
             mongodb-compass
+            kompose
           ];
 
           # Environment variables
