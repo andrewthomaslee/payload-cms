@@ -83,13 +83,14 @@
     });
 
     checks = forEachSupportedSystem ({pkgs}: {
-      kustomize-build = pkgs.runCommand "kustomize-build" {
-        nativeBuildInputs = [pkgs.kustomize];
-        src = ./kubernetes;
-      } ''
-        cp -r $src kubernetes
-        kustomize build ./kubernetes > $out
-      '';
+      kustomize-build =
+        pkgs.runCommand "kustomize-build" {
+          nativeBuildInputs = [pkgs.kustomize];
+          src = ./kubernetes;
+        } ''
+          cp -r $src kubernetes
+          kustomize build ./kubernetes > $out
+        '';
     });
 
     apps = forEachSupportedSystem ({pkgs}: {
@@ -97,9 +98,7 @@
         kompose-convert = pkgs.writeShellScriptBin "kompose-convert" ''
           rm -fr "$REPO_ROOT"/kubernetes && \
           mkdir -p "$REPO_ROOT"/kubernetes && \
-          ${pkgs.kompose}/bin/kompose --namespace payload-cms --file docker-compose.production.yaml convert --out "$REPO_ROOT"/kubernetes/ && \
-          yq -yi 'del(.spec.template.spec.volumes)' "$REPO_ROOT"/kubernetes/payload-cms-statefulset.yaml && \
-          rm -f "$REPO_ROOT"/kubernetes/payload-cms-persistentvolumeclaim.yaml
+          ${pkgs.kompose}/bin/kompose --namespace payload-cms --file docker-compose.production.yaml convert --out "$REPO_ROOT"/kubernetes/
 
           # Generate kustomization.yaml from all remaining YAML files
           KUST="$REPO_ROOT/kubernetes/kustomization.yaml"
