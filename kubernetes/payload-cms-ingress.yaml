@@ -2,12 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    kompose.cmd: /nix/store/s9ggddb4w8h8541qk8wv0f51zz5x7f4w-kompose-1.38.0/bin/kompose --file docker-compose.production.yaml convert --out /home/netsa/Desktop/github/andrewthomaslee/payload-cms/kubernetes/
-    kompose.controller.type: deployment
-    kompose.hpa.cpu: "85"
-    kompose.hpa.memory: "70"
-    kompose.hpa.replicas.max: "5"
-    kompose.hpa.replicas.min: "1"
+    kompose.cmd: /nix/store/s9ggddb4w8h8541qk8wv0f51zz5x7f4w-kompose-1.38.0/bin/kompose --file docker-compose.production.yaml convert --out /home/netsa/Desktop/github.com/andrewthomaslee/payload-cms/kubernetes/
+    kompose.controller.type: statefulset
     kompose.image-pull-policy: Always
     kompose.service.expose: andrewlee.fun
     kompose.service.expose.ingress-class-name: traefik
@@ -23,7 +19,7 @@ metadata:
     kompose.service.healthcheck.readiness.timeout: 30s
     kompose.service.type: clusterip
     kompose.version: 1.38.0 (HEAD)
-    kompose.volume.size: 8Gi
+    kompose.volume.size: 16Gi
     kompose.volume.storage-class-name: longhorn
     kompose.volume.subpath: /app
     kompose.volume.type: persistentVolumeClaim

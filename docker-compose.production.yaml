@@ -15,11 +15,7 @@ services:
     volumes:
       - payload-cms:/app
     labels:
-      - "kompose.controller.type=deployment"
-      - "kompose.hpa.cpu=85"
-      - "kompose.hpa.memory=70"
-      - "kompose.hpa.replicas.max=5"
-      - "kompose.hpa.replicas.min=1"
+      - "kompose.controller.type=statefulset"
       - "kompose.image-pull-policy=Always"
       - "kompose.service.expose=andrewlee.fun"
       - "kompose.service.expose.ingress-class-name=traefik"
@@ -34,11 +30,10 @@ services:
       - "kompose.service.healthcheck.readiness.tcp_port=3000"
       - "kompose.service.healthcheck.readiness.timeout=30s"
       - "kompose.service.type=clusterip"
-      - "kompose.volume.size=8Gi"
+      - "kompose.volume.size=16Gi"
       - "kompose.volume.storage-class-name=longhorn"
       - "kompose.volume.subpath=/app"
       - "kompose.volume.type=persistentVolumeClaim"
       
-
 volumes:
   payload-cms:
