@@ -82,6 +82,16 @@
       };
     });
 
+    checks = forEachSupportedSystem ({pkgs}: {
+      kustomize-build = pkgs.runCommand "kustomize-build" {
+        nativeBuildInputs = [pkgs.kustomize];
+        src = ./kubernetes;
+      } ''
+        cp -r $src kubernetes
+        kustomize build ./kubernetes > $out
+      '';
+    });
+
     apps = forEachSupportedSystem ({pkgs}: {
       default = let
         kompose-convert = pkgs.writeShellScriptBin "kompose-convert" ''
