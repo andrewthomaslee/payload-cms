@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    kompose.cmd: /nix/store/s9ggddb4w8h8541qk8wv0f51zz5x7f4w-kompose-1.38.0/bin/kompose --file docker-compose.production.yaml convert --out /home/netsa/Desktop/github.com/andrewthomaslee/payload-cms/kubernetes/
+    kompose.cmd: /nix/store/s9ggddb4w8h8541qk8wv0f51zz5x7f4w-kompose-1.38.0/bin/kompose --namespace payload-cms --file docker-compose.production.yaml convert --out /home/netsa/Desktop/github.com/andrewthomaslee/payload-cms/kubernetes/
     kompose.controller.type: statefulset
     kompose.image-pull-policy: Always
     kompose.service.expose: andrewlee.fun
@@ -26,6 +26,7 @@ metadata:
   labels:
     io.kompose.service: payload-cms
   name: payload-cms
+  namespace: payload-cms
 spec:
   ingressClassName: traefik
   rules:

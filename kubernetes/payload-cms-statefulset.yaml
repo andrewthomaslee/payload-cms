@@ -2,20 +2,22 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   annotations:
-    kompose.cmd: /nix/store/s9ggddb4w8h8541qk8wv0f51zz5x7f4w-kompose-1.38.0/bin/kompose --file docker-compose.production.yaml convert --out /home/netsa/Desktop/github.com/andrewthomaslee/payload-cms/kubernetes/
+    kompose.cmd: /nix/store/s9ggddb4w8h8541qk8wv0f51zz5x7f4w-kompose-1.38.0/bin/kompose
+      --namespace payload-cms --file docker-compose.production.yaml convert --out
+      /home/netsa/Desktop/github.com/andrewthomaslee/payload-cms/kubernetes/
     kompose.controller.type: statefulset
     kompose.image-pull-policy: Always
     kompose.service.expose: andrewlee.fun
     kompose.service.expose.ingress-class-name: traefik
     kompose.service.group: payload-cms
     kompose.service.healthcheck.liveness.http_get_path: /health
-    kompose.service.healthcheck.liveness.tcp_port: "3000"
+    kompose.service.healthcheck.liveness.tcp_port: '3000'
     kompose.service.healthcheck.readiness.http_get_path: /ready
-    kompose.service.healthcheck.readiness.http_get_port: "3000"
+    kompose.service.healthcheck.readiness.http_get_port: '3000'
     kompose.service.healthcheck.readiness.interval: 60s
-    kompose.service.healthcheck.readiness.retries: "5"
+    kompose.service.healthcheck.readiness.retries: '5'
     kompose.service.healthcheck.readiness.start_period: 60s
-    kompose.service.healthcheck.readiness.tcp_port: "3000"
+    kompose.service.healthcheck.readiness.tcp_port: '3000'
     kompose.service.healthcheck.readiness.timeout: 30s
     kompose.service.type: clusterip
     kompose.version: 1.38.0 (HEAD)
@@ -26,6 +28,7 @@ metadata:
   labels:
     io.kompose.service: payload-cms
   name: payload-cms
+  namespace: payload-cms
 spec:
   replicas: 1
   selector:
@@ -65,10 +68,6 @@ spec:
               name: payload-cms
               subPath: /app
       restartPolicy: Always
-      volumes:
-        - name: payload-cms
-          persistentVolumeClaim:
-            claimName: payload-cms
   volumeClaimTemplates:
     - metadata:
         labels:

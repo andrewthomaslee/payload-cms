@@ -39,6 +39,7 @@
             bun
             bash
             jq
+            yq
             mongodb-compass
             kompose
             kubeseal
@@ -64,7 +65,11 @@
     apps = forEachSupportedSystem ({pkgs}: {
       default = let
         kompose-convert = pkgs.writeShellScriptBin "kompose-convert" ''
-          rm -fr "$REPO_ROOT"/kubernetes && mkdir -p "$REPO_ROOT"/kubernetes && ${pkgs.kompose}/bin/kompose --file docker-compose.production.yaml convert --out "$REPO_ROOT"/kubernetes/
+          rm -fr "$REPO_ROOT"/kubernetes && \
+          mkdir -p "$REPO_ROOT"/kubernetes && \
+          ${pkgs.kompose}/bin/kompose --namespace payload-cms --file docker-compose.production.yaml convert --out "$REPO_ROOT"/kubernetes/ && \
+          yq -yi 'del(.spec.template.spec.volumes)' "$REPO_ROOT"/kubernetes/payload-cms-statefulset.yaml && \
+          rm -f "$REPO_ROOT"/kubernetes/payload-cms-persistentvolumeclaim.yaml
         '';
       in {
         type = "app";
