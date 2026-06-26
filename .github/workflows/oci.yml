@@ -24,3 +24,10 @@ jobs:
     with:
       tag: ${{ needs.tag.outputs.tag }}
     secrets: inherit
+
+  push-manifests:
+    needs: tag
+    uses: ./.github/workflows/_oci-manifests.yml
+    with:
+      tag: ${{ needs.tag.outputs.tag }}
+    secrets: inherit
