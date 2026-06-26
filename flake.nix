@@ -43,6 +43,7 @@
             mongodb-compass
             kompose
             kubeseal
+            kustomize
           ];
 
           # Environment variables
