@@ -175,6 +175,9 @@ export interface Page {
       };
       [k: string]: unknown;
     } | null;
+    subtitle?: string | null;
+    buttonText?: string | null;
+    buttonLink?: string | null;
     links?:
       | {
           link: {
@@ -201,7 +204,101 @@ export interface Page {
       | null;
     media?: (string | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | ArchiveBlock
+    | FormBlock
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        buttonText?: string | null;
+        buttonLink?: string | null;
+        video?: (string | null) | Media;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'aboutSection';
+      }
+    | {
+        features?:
+          | {
+              icon: string | Media;
+              title: string;
+              description: string;
+              id?: string | null;
+            }[]
+          | null;
+        buttonText?: string | null;
+        buttonLink?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featuresSection';
+      }
+    | {
+        heading: string;
+        logos?:
+          | {
+              logo: string | Media;
+              link?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'platformLogos';
+      }
+    | {
+        title: string;
+        testimonials?:
+          | {
+              photo: string | Media;
+              text: string;
+              name: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'testimonialsBlock';
+      }
+    | {
+        heading: string;
+        buttonLabel?: string | null;
+        buttonLink?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'ctaSection';
+      }
+    | {
+        heading?: string | null;
+        services?:
+          | {
+              title: string;
+              description: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'servicesGrid';
+      }
+    | AboutIntroBlock
+    | IframeEmbedBlock
+  )[];
   meta?: {
     title?: string | null;
     /**
@@ -783,6 +880,33 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AboutIntroBlock".
+ */
+export interface AboutIntroBlock {
+  sectionTitle: string;
+  cardTitle: string;
+  cardText: string;
+  image: string | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'aboutIntro';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "IframeEmbedBlock".
+ */
+export interface IframeEmbedBlock {
+  heading?: string | null;
+  intro?: string | null;
+  iframeUrl: string;
+  iframeTitle: string;
+  height: number;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'iframeEmbed';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1064,6 +1188,9 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         type?: T;
         richText?: T;
+        subtitle?: T;
+        buttonText?: T;
+        buttonLink?: T;
         links?:
           | T
           | {
@@ -1089,6 +1216,86 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        aboutSection?:
+          | T
+          | {
+              content?: T;
+              buttonText?: T;
+              buttonLink?: T;
+              video?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featuresSection?:
+          | T
+          | {
+              features?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    description?: T;
+                    id?: T;
+                  };
+              buttonText?: T;
+              buttonLink?: T;
+              id?: T;
+              blockName?: T;
+            };
+        platformLogos?:
+          | T
+          | {
+              heading?: T;
+              logos?:
+                | T
+                | {
+                    logo?: T;
+                    link?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        testimonialsBlock?:
+          | T
+          | {
+              title?: T;
+              testimonials?:
+                | T
+                | {
+                    photo?: T;
+                    text?: T;
+                    name?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        ctaSection?:
+          | T
+          | {
+              heading?: T;
+              buttonLabel?: T;
+              buttonLink?: T;
+              id?: T;
+              blockName?: T;
+            };
+        servicesGrid?:
+          | T
+          | {
+              heading?: T;
+              services?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+        };
+        aboutIntro?: T | AboutIntroBlockSelect<T>;
+        iframeEmbed?: T | IframeEmbedBlockSelect<T>;
       };
   meta?:
     | T
@@ -1185,6 +1392,31 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AboutIntroBlock_select".
+ */
+export interface AboutIntroBlockSelect<T extends boolean = true> {
+  sectionTitle?: T;
+  cardTitle?: T;
+  cardText?: T;
+  image?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "IframeEmbedBlock_select".
+ */
+export interface IframeEmbedBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  iframeUrl?: T;
+  iframeTitle?: T;
+  height?: T;
   id?: T;
   blockName?: T;
 }
@@ -1654,6 +1886,26 @@ export interface Header {
           url?: string | null;
           label: string;
         };
+        subItems?:
+          | {
+              link: {
+                type?: ('reference' | 'custom') | null;
+                newTab?: boolean | null;
+                reference?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'posts';
+                      value: string | Post;
+                    } | null);
+                url?: string | null;
+                label: string;
+              };
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -1686,6 +1938,7 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  copyrightText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1705,6 +1958,20 @@ export interface HeaderSelect<T extends boolean = true> {
               reference?: T;
               url?: T;
               label?: T;
+            };
+        subItems?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                  };
+              id?: T;
             };
         id?: T;
       };
@@ -1731,6 +1998,7 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  copyrightText?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

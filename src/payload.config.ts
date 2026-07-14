@@ -1,4 +1,4 @@
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { compatibilityOptions, mongooseAdapter } from '@payloadcms/db-mongodb'
 import sharp from 'sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
@@ -14,77 +14,92 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { patchCosmosSort } from './utilities/patchCosmosSort'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+patchCosmosSort()
+
 export default buildConfig({
-    admin: {
-        components: {
-            // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
-            // Feel free to delete this at any time. Simply remove the line below.
-            beforeLogin: ['@/components/BeforeLogin'],
-            // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-            // Feel free to delete this at any time. Simply remove the line below.
-            beforeDashboard: ['@/components/BeforeDashboard'],
-        },
-        importMap: {
-            baseDir: path.resolve(dirname),
-        },
-        user: Users.slug,
-        livePreview: {
-            breakpoints: [
-                {
-                    label: 'Mobile',
-                    name: 'mobile',
-                    width: 375,
-                    height: 667,
-                },
-                {
-                    label: 'Tablet',
-                    name: 'tablet',
-                    width: 768,
-                    height: 1024,
-                },
-                {
-                    label: 'Desktop',
-                    name: 'desktop',
-                    width: 1440,
-                    height: 900,
-                },
-            ],
-        },
+  admin: {
+    components: {
+      // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
+      // Feel free to delete this at any time. Simply remove the line below.
+      beforeLogin: ['@/components/BeforeLogin'],
+      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
+      // Feel free to delete this at any time. Simply remove the line below.
+      beforeDashboard: ['@/components/BeforeDashboard'],
     },
-    // This config helps us configure global or default features that the other editors can inherit
-    editor: defaultLexical,
-    db: mongooseAdapter({
-        url: process.env.DATABASE_URL || '',
-    }),
-    collections: [Pages, Posts, Media, Categories, Users],
-    cors: [getServerSideURL()].filter(Boolean),
-    globals: [Header, Footer],
-    plugins,
-    secret: process.env.PAYLOAD_SECRET,
-    sharp,
-    typescript: {
-        outputFile: path.resolve(dirname, 'payload-types.ts'),
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
-    jobs: {
-        access: {
-            run: ({ req }: { req: PayloadRequest }): boolean => {
-                // Allow logged in users to execute this endpoint (default)
-                if (req.user) return true
+    user: Users.slug,
+    livePreview: {
+      breakpoints: [
+        {
+          label: 'Mobile',
+          name: 'mobile',
+          width: 375,
+          height: 667,
+        },
+        {
+          label: 'Tablet',
+          name: 'tablet',
+          width: 768,
+          height: 1024,
+        },
+        {
+          label: 'Desktop',
+          name: 'desktop',
+          width: 1440,
+          height: 900,
+        },
+      ],
+    },
+  },
+  // This config helps us configure global or default features that the other editors can inherit
+  editor: defaultLexical,
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URL || '',
+    ...compatibilityOptions.cosmosdb,
+    // Cosmos DB only serves compound sorts that have an exactly matching
+    // composite index. Payload appends a `-createdAt` fallback to every
+    // non-unique sort, turning them all into compound sorts that 500.
+    // Disabling the fallback keeps every sort single-field, which Cosmos
+    // serves from the single-field indexes created by indexSortableFields.
+    disableFallbackSort: true,
+  }),
+  // Required for Azure Cosmos DB: it rejects sorts on non-indexed paths, and
+  // the admin list view sorts version collections by `version.updatedAt`.
+  // Without this, drafts-enabled collections (Pages/Posts) 500 in the admin.
+  // See https://payloadcms.com/docs/database/mongodb
+  indexSortableFields: true,
+  collections: [Pages, Posts, Media, Categories, Users],
+  cors: [getServerSideURL()].filter(Boolean),
+  globals: [Header, Footer],
+  plugins,
+  secret: process.env.PAYLOAD_SECRET,
+  sharp,
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
+  jobs: {
+    access: {
+      run: ({ req }: { req: PayloadRequest }): boolean => {
+        // Allow logged in users to execute this endpoint (default)
+        if (req.user) return true
 
-                const secret = process.env.CRON_SECRET
-                if (!secret) return false
+        const secret = process.env.CRON_SECRET
+        if (!secret) return false
 
-                // If there is no logged in user, then check
-                // for the Vercel Cron secret to be present as an
-                // Authorization header:
-                const authHeader = req.headers.get('authorization')
-                return authHeader === `Bearer ${secret}`
-            },
-        },
-        tasks: [],
+        // If there is no logged in user, then check
+        // for the Vercel Cron secret to be present as an
+        // Authorization header:
+        const authHeader = req.headers.get('authorization')
+        return authHeader === `Bearer ${secret}`
+      },
     },
+    tasks: [],
+  },
 })

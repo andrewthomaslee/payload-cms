@@ -29,6 +29,7 @@ import { slugField } from 'payload'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
+  defaultSort: '-createdAt',
   access: {
     create: authenticated,
     delete: authenticated,
@@ -48,7 +49,7 @@ export const Posts: CollectionConfig<'posts'> = {
     },
   },
   admin: {
-    defaultColumns: ['title', 'slug', 'updatedAt'],
+    defaultColumns: ['title', 'slug'],
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({

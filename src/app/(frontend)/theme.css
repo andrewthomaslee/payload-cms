@@ -1,0 +1,107 @@
+:root {
+  --primaryButtonTextColor: #000000;
+  --primaryButtonBackgroundColor: #c0d330; 
+  --secondaryButtonBackgroundHoverColor: #0eb0d9;
+  --secondaryButtonBackgroundColor: #3ec0e1; 
+  --primaryButtonBackgroundHoverColor: #b7c13b;
+  --secondaryButtonTextColor: #ffffff;
+  --defaultFont: "Poppins", sans-serif;
+  --theme-blue: #3ec0e1;
+  --theme-green: #c0d330; 
+}
+
+.prose { font-size:1.4rem; }
+.header-wraper { padding:70px 70px; }
+.block-btn-medium { padding:13px 18px; background:var(--primaryButtonBackgroundColor); color:var(--primaryButtonTextColor); font-family:var(--defaultFont); font-size:17px; font-weight:500; text-transform:uppercase; -webkit-border-top-left-radius:20px; -webkit-border-bottom-right-radius:20px; -moz-border-radius-topleft:20px; -moz-border-radius-bottomright:20px; border-top-left-radius:20px; border-bottom-right-radius:20px; }
+.block-btn-medium:hover { background:var(--primaryButtonBackgroundHoverColor); }
+.max-w-7xl { max-width:100rem; }
+.btn-green { cursor:pointer; padding:16px 24px; background:var(--primaryButtonBackgroundColor); color:var(--primaryButtonTextColor); font-family:var(--defaultFont); font-size:26px; font-weight:500; text-transform:uppercase; -webkit-border-top-left-radius:20px; -webkit-border-bottom-right-radius:20px; -moz-border-radius-topleft:20px; -moz-border-radius-bottomright:20px; border-top-left-radius:20px; border-bottom-right-radius:20px; }
+.btn-green:hover { background:var(--primaryButtonBackgroundHoverColor); }
+.btn-blue { cursor:pointer; padding:16px 24px; background:var(--secondaryButtonBackgroundColor); color:var(--secondaryButtonTextColor); font-family:var(--defaultFont); font-size:26px; font-weight:500; text-transform:uppercase; -webkit-border-top-left-radius:20px; -webkit-border-bottom-right-radius:20px; -moz-border-radius-topleft:20px; -moz-border-radius-bottomright:20px; border-top-left-radius:20px; border-bottom-right-radius:20px; }
+.btn-blue:hover { background:var(--secondaryButtonBackgroundHoverColor); }
+.block-btn-medium.btn-green, .block-btn-medium.btn-blue { padding:13px 18px; font-size:17px; }
+.text-3xl { font-size:26px; }
+.wethink { font-size:100px; font-weight:500; }
+.soyou { font-size:38px; font-weight:500; }
+.herobtn { font-size:32px; font-weight:500; }
+.platlogohead { font-size:38px; font-weight:400; }
+.testbox { background:#ffffff; padding:20px 20px; }
+.btnt-blue { background:#01add8;  color: #ffffff; }
+.green-section{ position: relative; }
+.top-bg, .bottom-bg{ background: #c0d330; height: 180px; }
+.top-bg{ clip-path: polygon( 0 0, 100% 0, 100% 55%, 50% 100%, 0 55% ); }
+.middle-content{ background: #c0d330; padding: 80px 0; }
+.bottom-bg{ clip-path: polygon( 0 45%, 50% 0, 100% 45%, 100% 100%, 0 100%  ); }
+.NavItems ul li a { font-size:18px; padding:0 15px; }
+.fnavp { padding-top:40px; }
+.header-wraper nav ul li a { font-size:18px; }
+.sub-page-wrapper { padding-top:0px; }
+.theme-blue { color:var(--theme-blue); }
+.theme-green { color:var(--theme-green); }
+.NavActive { color:var(--theme-green) !important; }
+p { font-size:17px; font-weight:300; line-height:28px; }
+.tcard h4 { font-size:16px;  }
+.ashero p { font-size:20px; font-weight:400; line-height:36px; }
+.NavDropdown li { padding:7px 0; }
+.NavDropdown li a { font-size:16px; }
+
+
+/* Header dropdown sub-menu */
+.NavItems ul li { position:relative; }
+.NavChevron { display:inline-block; width:16px; height:16px; margin-left:5px; vertical-align:middle; }
+.NavDropdown { display:none; position:absolute; top:100%; left:0; z-index:60; min-width:240px; background:#ffffff; padding:14px 0; box-shadow:0 8px 24px rgba(0,0,0,0.12); }
+.NavItems ul li:hover > .NavDropdown,
+.NavItems ul li:focus-within > .NavDropdown { display:block; }
+.NavDropdown li { display:block; }
+.NavDropdown a { display:block; padding:8px 24px; color:var(--theme-blue) !important; font-size:18px; white-space:nowrap; }
+.NavDropdown a:hover { color:var(--secondaryButtonBackgroundHoverColor) !important; }
+.NavDropdown a.NavActive { color:var(--theme-green) !important; }
+.aboutIntroSection { padding:0px 0 0; }
+.aboutIntroContainer { max-width:1400px; margin:auto; padding:0 40px; }
+.aboutIntroHeading { text-align:center; font-size:72px; color:#17afe5; font-weight:400; margin-bottom:20px; }
+.aboutIntroWrapper { position:relative; }
+.aboutIntroImageWrap { width:70%; margin-left:auto; }
+.aboutIntroImage { width:100%; display:block; }
+.aboutIntroCard { position:absolute; left:0; top:100px; width:700px; background:#17afe5; padding:70px; color:white; }
+.aboutIntroCard h3 { font-size:50px; margin-bottom:40px; font-weight:400; }
+.aboutIntroCard p { line-height:1.9; font-size:18px; }
+
+.visit-content { font-size: 24px; line-height: 1.9; }
+.visit-content h3 { font-size: 42px; margin: 40px 0 20px; }
+.visit-content a { color: #18aee3; text-decoration: underline; }
+.visit-content strong { font-weight: 700; }
+.NavItems ul li { position: relative; padding: 10px 0; }
+.mapmar { margin:50px 50px; }
+
+@media (min-width:240px) and (max-width:766px){
+.header-wraper { padding:20px 20px; }
+.maintwrap h1 { font-size:40px; }
+.soyou { font-size:26px; }
+.herobtn { font-size:26px; padding: 10px 25px; }
+.mbody { padding:0; }
+.fsmobile { padding:0; }
+.plmobile { padding:30px 0 0 0; }
+.platlogohead { font-size:30px; margin-bottom:25px; }
+.plimg { margin-bottom:50px; }
+.tbwrapper { padding:0; }
+.ctawrapper { padding:0; }
+.middle-content { padding:0px 0; }
+.tcard { padding:20px; }
+.tbwrapper h2 { margin-bottom:20px; }
+.mobile-hwap { padding:20px 10px 20px 0px; }
+.mobilex { cursor:pointer; }
+.mobile-nav ul li a { color:#ffffff; font-size:26px; font-weight:400; }
+.header-wraper .lucide-menu { margin-right: 16px; }
+.mobile-navf { position:absolute; bottom:50px; }
+.sub-page-wrapper h2 { font-size:38px; margin-bottom:40px;  }
+.sub-page-wrapper .gap-y-28 { row-gap:3rem; }
+
+.aboutIntroSection h2 { font-size:38px; margin-bottom:40px;  }
+.aboutIntroImageWrap { width:auto; margin-left:inherit; }
+.aboutIntroCard { width:auto; padding:25px; position: relative; top:0; }
+.aboutIntroCard h3 { margin-bottom:20px; font-size:36px; font-weight:400; line-height:46px; }
+.ctawrapper h2 { font-size:36px; }
+
+
+}
+

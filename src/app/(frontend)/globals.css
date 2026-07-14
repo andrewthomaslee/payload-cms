@@ -1,8 +1,9 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import "./theme.css";
+
 
 @config '../../../tailwind.config.mjs';
-
 @custom-variant dark (&:is([data-theme='dark'] *));
 @custom-variant sm (@media (width >= theme(--breakpoint-sm)));
 @custom-variant md (@media (width >= theme(--breakpoint-md)));
@@ -210,7 +211,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground min-h-[100vh] flex flex-col;
+    @apply bg-background text-foreground min-h-[100vh] flex flex-col; font-family: var(--font-poppins);
   }
 }
 

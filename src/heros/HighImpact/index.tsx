@@ -1,46 +1,51 @@
-'use client'
-import { useHeaderTheme } from '@/providers/HeaderTheme'
-import React, { useEffect } from 'react'
+"use client";
 
-import type { Page } from '@/payload-types'
+import { useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useHeaderTheme } from "@/providers/HeaderTheme";
 
-import { CMSLink } from '@/components/Link'
-import { Media } from '@/components/Media'
-import RichText from '@/components/RichText'
-
-export const HighImpactHero: React.FC<Page['hero']> = ({ links, media, richText }) => {
-  const { setHeaderTheme } = useHeaderTheme()
+export const HighImpactHero = () => {
+  const { setHeaderTheme } = useHeaderTheme();
 
   useEffect(() => {
-    setHeaderTheme('dark')
-  })
+    setHeaderTheme("dark");
+  }, [setHeaderTheme]);
 
   return (
-    <div
-      className="relative -mt-[10.4rem] flex items-center justify-center text-white"
-      data-theme="dark"
-    >
-      <div className="container mb-8 z-10 relative flex items-center justify-center">
-        <div className="max-w-[36.5rem] md:text-center">
-          {richText && <RichText className="mb-6" data={richText} enableGutter={false} />}
-          {Array.isArray(links) && links.length > 0 && (
-            <ul className="flex md:justify-center gap-4">
-              {links.map(({ link }, i) => {
-                return (
-                  <li key={i}>
-                    <CMSLink {...link} />
-                  </li>
-                )
-              })}
-            </ul>
-          )}
+    <section className="relative test h-screen min-h-[850px] overflow-hidden">
+      {/* Background */}
+      <img
+        src="/images/hero.jpg"
+        alt="Hero"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/20" />
+
+      {/* Content */}
+      <div className="relative z-10 mx-auto flex h-full max-w-screen-2xl items-center px-8">
+        <div className="maintwrap">
+          <h1 className="wethink  text-white leading-tight">
+            we think{" "}
+            <span className="relative inline-block">
+              inside
+              <span className="absolute left-0 -bottom-2 h-1 w-full bg-sky-400"></span>
+            </span>{" "}
+            the box
+          </h1>
+
+          <p className="mt-6 mb-10 soyou text-white">so you don't have to</p>
+
+          <Link
+            href="/workwithus"
+            className="inline-flex border-2 border-lime-400 px-10 py-5 herobtn uppercase tracking-wide text-lime-400 transition hover:bg-lime-400 hover:text-black"
+          >
+            GET A QUOTE
+          </Link>
         </div>
       </div>
-      <div className="min-h-[80vh] select-none">
-        {media && typeof media === 'object' && (
-          <Media fill imgClassName="-z-10 object-cover" priority resource={media} />
-        )}
-      </div>
-    </div>
-  )
-}
+    </section>
+  );
+};
