@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: payload-cms
+  name: payload-cms
+  namespace: payload-cms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: payload-cms
+  template:
+    metadata:
+      labels:
+        io.kompose.service: payload-cms
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: 'OnRootMismatch'
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - env:
+            - name: HOSTNAME
+              value: 0.0.0.0
+            - name: NODE_ENV
+              value: production
+          envFrom:
+            - secretRef:
+                name: env
+          image: ghcr.io/andrewthomaslee/payload-cms/site:latest
+          name: payload-cms
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 30
+          volumeMounts:
+            - mountPath: /app/public/media
+              name: payload-cms-media
+              subPath: media
+            - mountPath: /app/.next/cache
+              name: payload-cms-cache
+      restartPolicy: Always
+      volumes:
+        - name: payload-cms-media
+          persistentVolumeClaim:
+            claimName: payload-cms-media
+        - name: payload-cms-cache
+          emptyDir: {}

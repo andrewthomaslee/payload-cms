@@ -1,0 +1,7 @@
+resources:
+  - payload-cms-ingress.yaml
+  - payload-cms-media-persistentvolumeclaim.yaml
+  - payload-cms-namespace.yaml
+  - payload-cms-service.yaml
+  - payload-cms-deployment.yaml
+  - env-sealed-secret.yaml
