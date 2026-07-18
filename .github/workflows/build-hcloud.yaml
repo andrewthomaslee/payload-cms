@@ -1,12 +1,9 @@
 name: build-hcloud
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Manual tag to apply'
-        required: false
-        type: string
+  push:
+    branches:
+      - dev
 
 permissions:
   id-token: write
@@ -43,7 +40,6 @@ jobs:
           tags: |
             type=raw,value=latest
             type=raw,value=${{ steps.vars.outputs.commit_count }}
-            type=raw,value=${{ inputs.tag }},enable=${{ inputs.tag != '' }}
           flavor: latest=auto
 
       - name: Install WARP
