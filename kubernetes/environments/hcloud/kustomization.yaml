@@ -1,0 +1,11 @@
+namespace: payload-cms
+resources:
+  - ../../package
+  - sealed-auth-secret.yaml
+  - env-sealed-secret.yaml
+labels:
+  - pairs:
+      env: production
+      cluster: hcloud
+    includeSelectors: true 
+    includeTemplates: true 

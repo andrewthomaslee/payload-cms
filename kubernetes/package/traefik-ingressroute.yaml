@@ -1,0 +1,24 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: payload-cms
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`payload-cms.localhost`)
+      priority: 10
+      services:
+        - name: payload-cms
+          port: 3000
+    - kind: Rule
+      match: Host(`payload-cms.localhost`) && Path(`/admin`)
+      priority: 11
+      middlewares:
+        - name: basic-auth-middleware
+      services:
+        - name: payload-cms
+          port: 3000

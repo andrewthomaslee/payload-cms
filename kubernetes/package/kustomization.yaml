@@ -1,0 +1,11 @@
+resources:
+  - flux-source-oci.yaml
+  - flux-helmrelease.yaml
+  - payload-cms-media-persistentvolumeclaim.yaml
+  - payload-cms-service.yaml
+  - payload-cms-deployment.yaml
+  - traefik-middleware.yaml
+  - traefik-ingressroute.yaml
+labels:
+  - pairs:
+      app: payload-cms

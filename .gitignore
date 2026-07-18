@@ -30,3 +30,4 @@ result
 
 # compose
 kubernetes/env-configmap.yaml
+.secrets

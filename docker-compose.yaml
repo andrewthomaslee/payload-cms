@@ -1,0 +1,10 @@
+services:
+  mongo:
+    image: bitnami/mongodb:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb-payload-cms:/data/db
+
+volumes:
+  mongodb-payload-cms:

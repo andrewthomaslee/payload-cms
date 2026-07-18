@@ -1,19 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    io.kompose.service: payload-cms
   name: payload-cms
-  namespace: payload-cms
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      io.kompose.service: payload-cms
   template:
-    metadata:
-      labels:
-        io.kompose.service: payload-cms
     spec:
       securityContext:
         runAsUser: 1001

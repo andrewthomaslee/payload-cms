@@ -3,9 +3,9 @@
 
   # Flake inputs
   inputs = {
-    flake-schemas.url = "https://flakehub.com/f/DeterminateSystems/flake-schemas/*";
-
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/*";
+    kube-infra.url = "https://flakehub.com/f/andrewthomaslee/kube-infra/0.1.x";
+    flake-schemas.follows = "kube-infra/flake-schemas";
+    nixpkgs.follows = "kube-infra/nixpkgs";
   };
 
   # Flake outputs that other flakes can use
@@ -13,7 +13,9 @@
     self,
     flake-schemas,
     nixpkgs,
+    kube-infra,
   }: let
+    inherit (nixpkgs) lib;
     # Helpers for producing system-specific outputs
     supportedSystems = ["x86_64-linux"];
     forEachSupportedSystem = f:
@@ -21,8 +23,47 @@
         f {
           pkgs = import nixpkgs {
             inherit system;
+            overlays = [kube-infra.inputs.home.overlays.default];
             config.allowUnfree = true;
           };
+        });
+
+    environmentsDir = ./kubernetes/environments;
+    environmentsNames = builtins.attrNames (lib.filterAttrs (n: v: v == "directory") (builtins.readDir environmentsDir));
+    mkKustomizeOutputs = pkgs:
+      lib.genAttrs (map (name: "kustomize-${name}") environmentsNames) (name: let
+        envName = lib.removePrefix "kustomize-" name;
+      in
+        pkgs.runCommand "kustomize-${envName}" {
+          nativeBuildInputs = [pkgs.kustomize];
+          src = ./kubernetes;
+        } ''
+          kustomize build $src/environments/${envName} > $out
+        '');
+
+    mkOciOutputs = pkgs:
+      lib.genAttrs (map (name: "oci-${name}") environmentsNames) (name: let
+        envName = lib.removePrefix "oci-" name;
+        kustomizeBuild =
+          pkgs.runCommand "kustomize-${envName}-build" {
+            nativeBuildInputs = [pkgs.kustomize];
+            src = ./kubernetes;
+          } ''
+            kustomize build $src/environments/${envName} > $out
+          '';
+        rootfs = pkgs.runCommand "oci-${envName}-rootfs" {} ''
+          mkdir -p $out
+          cat > $out/kustomization.yaml <<EOF
+          resources:
+            - resources.yaml
+          EOF
+          cp ${kustomizeBuild} $out/resources.yaml
+        '';
+      in
+        pkgs.dockerTools.buildImage {
+          name = "oci-${envName}";
+          tag = "latest";
+          copyToRoot = rootfs;
         });
   in {
     # Schemas tell Nix about the structure of your flake's outputs
@@ -44,78 +85,41 @@
             kompose
             kubeseal
             kustomize
+            dive
+            k3s
           ];
 
           # Environment variables
           env = {
-            NEXT_PUBLIC_SERVER_URL = "http://localhost:3000";
+            NODE_ENV = "development";
+            HOST = "0.0.0.0";
           };
 
           # A hook run every time you enter the environment
           shellHook = ''
             export REPO_ROOT
             REPO_ROOT=$(git rev-parse --show-toplevel)
-
             eval "$(bunx varlock load --format shell --path "$REPO_ROOT"/.env)"
+
+            mkdir -p "$REPO_ROOT"/.secrets/kubeconfig
+            export KUBECONFIG
+            KUBECONFIG=$(find "$REPO_ROOT/.secrets/kubeconfig" -type f 2>/dev/null | paste -sd ":" -)
+            kubectl config get-contexts
+
             pnpm install
-            echo "Enjoy!"
+            echo "Enjoy! Payload-CMS"
           '';
         };
       });
 
-    packages = forEachSupportedSystem ({pkgs}: let
-      manifests = pkgs.stdenv.mkDerivation {
-        name = "kubernetes-manifests-dir";
-        src = ./kubernetes;
-        buildCommand = ''
-          mkdir -p $out/kubernetes
-          cp -r $src/* $out/kubernetes/
-          rm -f $out/kubernetes/env-configmap.yaml || true
-        '';
-      };
+    packages = forEachSupportedSystem ({pkgs}: (mkKustomizeOutputs pkgs) // (mkOciOutputs pkgs));
+
+    apps = forEachSupportedSystem ({pkgs}: let
+      system = pkgs.stdenv.hostPlatform.system;
     in {
-      kubernetes-manifests = pkgs.dockerTools.buildImage {
-        name = "payload-cms/kubernetes-manifests";
-        tag = "latest";
-        copyToRoot = [manifests];
-        config.Labels."org.opencontainers.image.description" = "pre-packaged payload-cms kubernetes manifests";
-      };
+      inherit (kube-infra.apps."${system}") seal-env;
     });
 
-    checks = forEachSupportedSystem ({pkgs}: {
-      kustomize-build =
-        pkgs.runCommand "kustomize-build" {
-          nativeBuildInputs = [pkgs.kustomize];
-          src = ./kubernetes;
-        } ''
-          cp -r $src kubernetes
-          kustomize build ./kubernetes > $out
-        '';
-    });
-
-    apps = forEachSupportedSystem ({pkgs}: {
-      default = let
-        kompose-convert = pkgs.writeShellScriptBin "kompose-convert" ''
-          rm -fr "$REPO_ROOT"/kubernetes && \
-          mkdir -p "$REPO_ROOT"/kubernetes && \
-          ${pkgs.kompose}/bin/kompose --namespace payload-cms --file docker-compose.production.yaml convert --out "$REPO_ROOT"/kubernetes/
-
-          # Generate kustomization.yaml from all remaining YAML files
-          KUST="$REPO_ROOT/kubernetes/kustomization.yaml"
-          echo "apiVersion: kustomize.config.k8s.io/v1beta1" > "$KUST"
-          echo "kind: Kustomization" >> "$KUST"
-          echo "resources:" >> "$KUST"
-          for f in "$REPO_ROOT"/kubernetes/*.yaml; do
-            name="$(basename "$f")"
-            [ "$name" = "kustomization.yaml" ] && continue
-            [ "$name" = "env-configmap.yaml" ] && continue
-            echo "  - $name" >> "$KUST"
-          done
-        '';
-      in {
-        type = "app";
-        program = "${kompose-convert}/bin/kompose-convert";
-      };
-    });
+    checks = forEachSupportedSystem ({pkgs}: mkKustomizeOutputs pkgs);
   };
 }

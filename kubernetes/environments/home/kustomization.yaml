@@ -1,0 +1,10 @@
+namespace: payload-cms
+resources:
+  - ../../package
+  - sealed-auth-secret.yaml
+  - env-sealed-secret.yaml
+labels:
+  - pairs:
+      io.kompose.service: payload-cms
+    includeSelectors: true 
+    includeTemplates: true 
