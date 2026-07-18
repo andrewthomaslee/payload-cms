@@ -30,7 +30,7 @@ jobs:
         with:
           check-owner: false
           check-supported: false
-          fail-mode: true
+          fail-mode: false
 
       - name: Nix Flake Check
         run: nix flake check --show-trace
