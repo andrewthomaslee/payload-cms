@@ -18,10 +18,10 @@ patches:
     patch: |-
       - op: replace
         path: /spec/routes/0/match
-        value: "Host(`payload-cms.netsam.dev`)"
+        value: "Host(`bff.netsam.dev`)"
       - op: replace
         path: /spec/routes/1/match
-        value: "Host(`payload-cms.netsam.dev`) && Path(`/admin`)"
+        value: "Host(`bff.netsam.dev`) && Path(`/admin`)"
   - target:
       group: apps
       version: v1

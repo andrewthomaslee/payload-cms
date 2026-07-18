@@ -17,10 +17,10 @@ patches:
     patch: |-
       - op: replace
         path: /spec/routes/0/match
-        value: "Host(`payload-cms.andrewlee.fun`)"
+        value: "Host(`bff.andrewlee.fun`)"
       - op: replace
         path: /spec/routes/1/match
-        value: "Host(`payload-cms.andrewlee.fun`) && Path(`/admin`)"
+        value: "Host(`bff.andrewlee.fun`) && Path(`/admin`)"
   - target:
       group: apps
       version: v1
