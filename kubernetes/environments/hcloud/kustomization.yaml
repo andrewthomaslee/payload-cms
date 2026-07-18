@@ -7,5 +7,18 @@ labels:
   - pairs:
       env: production
       cluster: hcloud
-    includeSelectors: true 
-    includeTemplates: true 
+    includeSelectors: true
+    includeTemplates: true
+patches:
+  - target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: payload-cms
+    patch: |-
+      - op: replace
+        path: /spec/routes/0/match
+        value: "Host(`payload-cms.netsam.dev`)"
+      - op: replace
+        path: /spec/routes/1/match
+        value: "Host(`payload-cms.netsam.dev`) && Path(`/admin`)"

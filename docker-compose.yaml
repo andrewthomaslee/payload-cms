@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: bitnami/mongodb:latest
+    image: mongo:latest
     ports:
       - 27017:27017
     volumes:

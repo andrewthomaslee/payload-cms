@@ -6,5 +6,18 @@ resources:
 labels:
   - pairs:
       io.kompose.service: payload-cms
-    includeSelectors: true 
-    includeTemplates: true 
+    includeSelectors: true
+    includeTemplates: true
+patches:
+  - target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: payload-cms
+    patch: |-
+      - op: replace
+        path: /spec/routes/0/match
+        value: "Host(`payload-cms.andrewlee.fun`)"
+      - op: replace
+        path: /spec/routes/1/match
+        value: "Host(`payload-cms.andrewlee.fun`) && Path(`/admin`)"
