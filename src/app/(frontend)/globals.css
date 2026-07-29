@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import "./theme.css";
+@import "./theme.css"; 
 
 
 @config '../../../tailwind.config.mjs';
@@ -211,7 +211,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground min-h-[100vh] flex flex-col; font-family: var(--font-poppins);
+    @apply bg-background text-foreground min-h-[100vh] flex flex-col; font-family: var(--font-poppins); 
   }
 }
 

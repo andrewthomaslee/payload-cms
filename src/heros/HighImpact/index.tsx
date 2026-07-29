@@ -22,7 +22,7 @@ export const HighImpactHero = () => {
       />
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/40" />
 
       {/* Content */}
       <div className="relative z-10 mx-auto flex h-full max-w-screen-2xl items-center px-8">
@@ -31,7 +31,7 @@ export const HighImpactHero = () => {
             we think{" "}
             <span className="relative inline-block">
               inside
-              <span className="absolute left-0 -bottom-2 h-1 w-full bg-sky-400"></span>
+              <span className="absolute left-0  h-1 w-full hunderl"></span>
             </span>{" "}
             the box
           </h1>
