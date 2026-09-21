@@ -31,3 +31,6 @@ result
 # compose
 kubernetes/env-configmap.yaml
 .secrets
+
+# agent session handoffs
+.baton-pass/
