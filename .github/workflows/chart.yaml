@@ -1,0 +1,46 @@
+name: chart
+
+on:
+  workflow_dispatch:
+
+permissions:
+  packages: write
+  contents: read
+
+jobs:
+  lint-package-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Get Commit Count
+        id: vars
+        run: echo "commit_count=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.0
+        with:
+          version: v3.16.3
+
+      - name: Lint chart
+        run: helm lint charts/payload-cms
+
+      - name: Package chart
+        run: helm package charts/payload-cms --version "0.1.${{ steps.vars.outputs.commit_count }}" --app-version "0.1.${{ steps.vars.outputs.commit_count }}"
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push chart to GHCR
+        run: |
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          helm push "payload-cms-0.1.${{ steps.vars.outputs.commit_count }}.tgz" \
+            "oci://ghcr.io/${OWNER_LOWER}/payload-cms/chart"

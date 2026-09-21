@@ -24,9 +24,18 @@ pnpm dev           # http://localhost:3000
 Every GitHub Actions workflow is **manually dispatched**; every OCI artifact is tagged `0.1.<N>` (N = commits since git init):
 
 1. **`build-dev`** — builds the Next.js app image (live MongoDB at build time via Cloudflare WARP) → `ghcr.io/<owner>/payload-cms/site/dev`, cosign-signed.
-2. **`chart`** — Helm chart + per-env values pushed with oras → `payload-cms/chart`, `payload-cms/chart/values-{dev,production}`.
-3. **`promote-production`** — re-tags a dev image digest → `site/production`, gated by human approval (GitHub Environment required reviewers). No rebuild.
-4. **Flux** on the `borg` cluster syncs `kubernetes/environments/{dev,production}` (OCIRepository + HelmRelease) into the `payload-cms-dev` / `payload-cms-production` namespaces.
-5. **`docs`** — mkdocs → GitHub Pages.
+2. **`chart`** — Helm chart → `payload-cms/chart` (`helm push`, helm OCI media types).
+3. **`promote-production`** — re-tags a dev image digest → `site/production`, gated by human approval. No rebuild.
+4. **`release`** — pushes `kubernetes/environments/{dev,production}` as Flux kustomization OCI artifacts → `payload-cms/kustomization/{dev,production}`.
+5. **Flux** on the `borg` cluster pulls those artifacts and applies the environment manifests: `OCIRepository` (chart, semver ref) + `HelmRelease` with **inline values** → the `payload-cms-dev` / `payload-cms-production` namespaces.
+6. **`docs`** — mkdocs → GitHub Pages.
+
+### One-time setup (out of scope for this repo's automation)
+
+The following are configured by hand in GitHub, not by any workflow:
+
+- **GitHub Environments** `dev` and `production` (per-env secrets/vars: `DATABASE_URL`, `PAYLOAD_SECRET`, `CRON_SECRET`, `PREVIEW_SECRET`, `NEXT_PUBLIC_SERVER_URL`, `CF_WARP_ORG`, `CF_WARP_CLIENT_ID`, `CF_WARP_CLIENT_SECRET`). `production` gets **required reviewers** — this is the async approval gate before promotion.
+- **Branch protection** on `production` (PR-only merges from `dev`).
+- **GitHub Pages** publish source set to the `github-pages` environment/branch used by `docs.yaml`.
 
 See [AGENTS.md](AGENTS.md) for the full operating manual and `documentation/` for architecture and decisions.

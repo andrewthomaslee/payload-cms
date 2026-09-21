@@ -1,0 +1,6 @@
+apiVersion: v2
+name: payload-cms
+description: Payload CMS (Next.js standalone) application deployment
+type: application
+version: 0.1.0
+appVersion: '0.1.0'

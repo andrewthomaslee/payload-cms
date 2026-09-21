@@ -1,0 +1,28 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: payload-cms
+  namespace: payload-cms-production
+spec:
+  interval: 10m
+  chartRef:
+    kind: OCIRepository
+    name: payload-cms-chart
+  values:
+    image:
+      repository: ghcr.io/andrewthomaslee/payload-cms/site/production
+      # TODO: set the tag promoted by the promote-production workflow.
+      tag: 0.1.0
+      pullPolicy: IfNotPresent
+    envFromSecret: payload-cms-env
+    mongodb:
+      enabled: true
+      secretName: mongodb-connection
+      secretKey: DATABASE_URL
+    persistence:
+      accessMode: ReadWriteOnce
+      size: 5Gi
+    ingressRoute:
+      enabled: true
+      # TODO: set the real production hostname.
+      host: payload-cms.example.invalid

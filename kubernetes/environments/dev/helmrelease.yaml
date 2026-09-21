@@ -1,0 +1,29 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: payload-cms
+  namespace: payload-cms-dev
+spec:
+  interval: 10m
+  chartRef:
+    kind: OCIRepository
+    name: payload-cms-chart
+  values:
+    image:
+      repository: ghcr.io/andrewthomaslee/payload-cms/site/dev
+      # TODO: pin 0.1.N tags here for reproducible dev deploys.
+      # latest tracks the newest dev image (pull on every pod restart).
+      tag: latest
+      pullPolicy: Always
+    envFromSecret: payload-cms-env
+    mongodb:
+      enabled: true
+      secretName: mongodb-connection
+      secretKey: DATABASE_URL
+    persistence:
+      accessMode: ReadWriteMany
+      size: 10Gi
+    ingressRoute:
+      enabled: true
+      # TODO: set the real dev hostname.
+      host: payload-cms.dev.example.invalid

@@ -1,0 +1,104 @@
+# Default values for the payload-cms chart.
+
+image:
+  repository: ghcr.io/andrewthomaslee/payload-cms/site/dev
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+nameOverride: ''
+fullnameOverride: ''
+
+# RWO (ReadWriteOnce) persistence allows only 1 replica.
+# For replicaCount > 1 use persistence.accessMode: ReadWriteMany.
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: ''
+
+service:
+  type: ClusterIP
+  port: 3000
+
+# Plain (non-secret) environment variables rendered into the container.
+# Secrets must NOT go here — put them in envFromSecret.
+env:
+  HOSTNAME: 0.0.0.0
+  NODE_ENV: production
+
+# Secret holding the application environment (e.g. PAYLOAD_SECRET,
+# CRON_SECRET, PREVIEW_SECRET, NEXT_PUBLIC_SERVER_URL), delivered via envFrom.
+envFromSecret: payload-cms-env
+
+# Injects DATABASE_URL from the cluster-managed MongoDB connection secret.
+# MongoDB itself lives outside this repo (reached via cloudflared tunnel).
+mongodb:
+  enabled: true
+  secretName: mongodb-connection
+  secretKey: DATABASE_URL
+
+persistence:
+  enabled: true
+  # Mount an existing claim instead of creating one (e.g. NFS-backed RWX).
+  existingClaim: ''
+  accessMode: ReadWriteOnce
+  storageClass: ''
+  size: 5Gi
+  mountPath: /app/public/media
+  subPath: media
+
+resources: {}
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 60
+  timeoutSeconds: 30
+  failureThreshold: 5
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 120
+  periodSeconds: 30
+  timeoutSeconds: 30
+  failureThreshold: 5
+
+# .next/build cache — always an emptyDir, never a claim.
+# The media claim follows Dockerfile ownership (uid/gid 1001).
+podSecurityContext:
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  fsGroupChangePolicy: OnRootMismatch
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop: [ALL]
+
+# Gateway API HTTPRoute (gateway.networking.k8s.io/v1).
+httproute:
+  enabled: false
+  annotations: {}
+  parentRefs: []
+  hostnames: []
+
+# Traefik IngressRoute (traefik.io/v1alpha1).
+ingressRoute:
+  enabled: false
+  entryPoints: [web]
+  host: payload-cms.localhost
+  admin:
+    # Attach the basic-auth middleware to /admin.
+    basicAuth: false
+    basicAuthSecret: basic-auth-secret

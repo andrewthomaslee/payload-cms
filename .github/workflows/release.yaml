@@ -1,67 +1,52 @@
-name: kustomize-oci
+name: release
 
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Manual tag to apply'
-        required: false
-        type: string
+      environment:
+        description: 'Which kustomization artifact to push'
+        required: true
+        type: choice
+        default: dev
+        options:
+          - dev
+          - production
 
 permissions:
   id-token: write
-  contents: write
   packages: write
+  contents: read
 
 jobs:
-  flake-check:
+  push-kustomization:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
-          persist-credentials: true
-
-      - name: Setup Nix
-        uses: ./.github/actions/setup-nix
-
-      - name: Flake Checker
-        uses: DeterminateSystems/flake-checker-action@main
-        with:
-          check-owner: false
-          check-supported: false
-          fail-mode: false
-
-      - name: Nix Flake Check
-        run: nix flake check --show-trace
-
-  build-shell:
-    needs: flake-check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6.0.2
-        with:
-          persist-credentials: true
-
-      - name: Setup Nix
-        uses: ./.github/actions/setup-nix
-
-      - name: Build Dev Shell
-        run: nix build .#devShells.x86_64-linux.default --show-trace
-
-  build-and-push:
-    needs: flake-check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6.0.2
-        with:
-          persist-credentials: true
+          persist-credentials: false
           fetch-depth: 0
 
+      - name: Get Commit Count
+        id: vars
+        run: echo "commit_count=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
+
+      - name: Build kustomization
+        run: |
+          nix build ".#packages.x86_64-linux.kustomize-${{ inputs.environment }}" \
+            --out-link result --show-trace
+          mkdir -p dist
+          cp result dist/resources.yaml
+          cat > dist/kustomization.yaml <<'EOF'
+          apiVersion: kustomize.config.k8s.io/v1beta1
+          kind: Kustomization
+          resources:
+            - resources.yaml
+          EOF
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4.2.0
@@ -70,74 +55,32 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build OCI for home
+      - name: Push kustomization OCI artifact
         run: |
-          nix build .#packages.x86_64-linux.oci-home --out-link result-home --show-trace
-          docker load -i result-home
-
-      - name: Tag and Push Home OCI Image
-        id: push-home
-        run: |
-          COMMIT_COUNT=$(git rev-list --count HEAD)
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          REPO_HOME="ghcr.io/${OWNER_LOWER}/payload-cms/kustomization/home"
-          IMAGE_HASH=$(docker inspect --format='{{.Id}}' oci-home:latest | cut -d':' -f2)
-
-          docker tag oci-home:latest "${REPO_HOME}:${COMMIT_COUNT}"
-          docker tag oci-home:latest "${REPO_HOME}:latest"
-          docker tag oci-home:latest "${REPO_HOME}:${IMAGE_HASH}"
-
-          docker push "${REPO_HOME}:${COMMIT_COUNT}"
-          docker push "${REPO_HOME}:latest"
-          docker push "${REPO_HOME}:${IMAGE_HASH}"
-
-          if [ -n "${{ inputs.tag }}" ]; then
-            docker tag oci-home:latest "${REPO_HOME}:${{ inputs.tag }}"
-            docker push "${REPO_HOME}:${{ inputs.tag }}"
-          fi
-
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${REPO_HOME}:${COMMIT_COUNT}")
-          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
-
-      - name: Build OCI for hcloud
-        run: |
-          nix build .#packages.x86_64-linux.oci-hcloud --out-link result-hcloud --show-trace
-          docker load -i result-hcloud
-
-      - name: Tag and Push Hcloud OCI Image
-        id: push-hcloud
-        run: |
-          COMMIT_COUNT=$(git rev-list --count HEAD)
-          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          REPO_HCLOUD="ghcr.io/${OWNER_LOWER}/payload-cms/kustomization/hcloud"
-          IMAGE_HASH=$(docker inspect --format='{{.Id}}' oci-hcloud:latest | cut -d':' -f2)
-
-          docker tag oci-hcloud:latest "${REPO_HCLOUD}:${COMMIT_COUNT}"
-          docker tag oci-hcloud:latest "${REPO_HCLOUD}:latest"
-          docker tag oci-hcloud:latest "${REPO_HCLOUD}:${IMAGE_HASH}"
-
-          docker push "${REPO_HCLOUD}:${COMMIT_COUNT}"
-          docker push "${REPO_HCLOUD}:latest"
-          docker push "${REPO_HCLOUD}:${IMAGE_HASH}"
-
-          if [ -n "${{ inputs.tag }}" ]; then
-            docker tag oci-hcloud:latest "${REPO_HCLOUD}:${{ inputs.tag }}"
-            docker push "${REPO_HCLOUD}:${{ inputs.tag }}"
-          fi
-
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${REPO_HCLOUD}:${COMMIT_COUNT}")
-          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          ARTIFACT="ghcr.io/${OWNER_LOWER}/payload-cms/kustomization/${{ inputs.environment }}"
+          flux push artifact "oci://${ARTIFACT}" \
+            --path ./dist \
+            --source "$(git config --get remote.origin.url)" \
+            --revision "$(git branch --show-current)@sha1:$(git rev-parse HEAD)" \
+            --tag "0.1.${{ steps.vars.outputs.commit_count }}" \
+            --tag latest
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v4.1.2
 
-      - name: Sign the images with GitHub OIDC Token
+      - name: Sign the artifact with GitHub OIDC Token
         run: |
-          cosign sign --yes "${{ steps.push-home.outputs.digest }}"
-          cosign sign --yes "${{ steps.push-hcloud.outputs.digest }}"
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          ARTIFACT="ghcr.io/${OWNER_LOWER}/payload-cms/kustomization/${{ inputs.environment }}"
+          DIGEST=$(crane digest "${ARTIFACT}:latest" || true)
+          if [ -z "$DIGEST" ]; then
+            DIGEST=$(crane digest "${ARTIFACT}:0.1.${{ steps.vars.outputs.commit_count }}")
+          fi
+          cosign sign --yes "${ARTIFACT}@${DIGEST}"
 
   flakehub:
-    needs: [build-shell, build-and-push]
+    needs: push-kustomization
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

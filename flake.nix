@@ -1,105 +1,94 @@
 {
-  description = "payload-cms repo";
+  description = "payload-cms repo — OCI app images + Helm chart + Flux GitOps";
 
-  # Flake inputs
   inputs = {
-    kube-infra.url = "https://flakehub.com/f/andrewthomaslee/kube-infra/0.1.x";
-    flake-schemas.follows = "kube-infra/flake-schemas";
-    nixpkgs.follows = "kube-infra/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
+
+    mkdocs-flake = {
+      url = "github:applicative-systems/mkdocs-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  # Flake outputs that other flakes can use
-  outputs = {
-    self,
-    flake-schemas,
-    nixpkgs,
-    kube-infra,
-  }: let
-    inherit (nixpkgs) lib;
-    # Helpers for producing system-specific outputs
-    supportedSystems = ["x86_64-linux"];
-    forEachSupportedSystem = f:
-      nixpkgs.lib.genAttrs supportedSystems (system:
-        f {
-          pkgs = import nixpkgs {
-            inherit system;
-            overlays = [kube-infra.inputs.home.overlays.default];
-            config.allowUnfree = true;
-          };
-        });
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake {inherit inputs;} ({self, ...}: {
+      systems = ["x86_64-linux"];
 
-    environmentsDir = ./kubernetes/environments;
-    environmentsNames = builtins.attrNames (lib.filterAttrs (n: v: v == "directory") (builtins.readDir environmentsDir));
-    mkKustomizeOutputs = pkgs:
-      lib.genAttrs (map (name: "kustomize-${name}") environmentsNames) (name: let
-        envName = lib.removePrefix "kustomize-" name;
-      in
-        pkgs.runCommand "kustomize-${envName}" {
-          nativeBuildInputs = [pkgs.kustomize];
-          src = ./kubernetes;
-        } ''
-          kustomize build $src/environments/${envName} > $out
-        '');
+      imports = [inputs.mkdocs-flake.flakeModules.default];
 
-    mkOciOutputs = pkgs:
-      lib.genAttrs (map (name: "oci-${name}") environmentsNames) (name: let
-        envName = lib.removePrefix "oci-" name;
-        kustomizeBuild =
-          pkgs.runCommand "kustomize-${envName}-build" {
+      perSystem = {pkgs, ...}: let
+        inherit (inputs.nixpkgs) lib;
+
+        environmentsDir = ./kubernetes/environments;
+        envNames = builtins.attrNames (
+          lib.filterAttrs (_: v: v == "directory") (builtins.readDir environmentsDir)
+        );
+
+        mkKustomizeCheck = env:
+          pkgs.runCommand "kustomize-${env}" {
             nativeBuildInputs = [pkgs.kustomize];
             src = ./kubernetes;
           } ''
-            kustomize build $src/environments/${envName} > $out
+            kustomize build $src/environments/${env} > $out
           '';
-        rootfs = pkgs.runCommand "oci-${envName}-rootfs" {} ''
-          mkdir -p $out
-          cat > $out/kustomization.yaml <<EOF
-          resources:
-            - resources.yaml
-          EOF
-          cp ${kustomizeBuild} $out/resources.yaml
-        '';
-      in
-        pkgs.dockerTools.buildImage {
-          name = "oci-${envName}";
-          tag = "latest";
-          copyToRoot = rootfs;
-        });
-  in {
-    # Schemas tell Nix about the structure of your flake's outputs
-    inherit (flake-schemas) schemas;
+      in {
+        formatter = pkgs.alejandra;
 
-    # Development environments
-    devShells = forEachSupportedSystem ({pkgs}:
-      with pkgs; {
-        default = mkShell {
-          # Pinned packages available in the environment
-          packages = [
+        # Mkdocs documentation site: `nix build .#documentation`
+        # and `nix run .#watch-documentation`.
+        documentation.mkdocs-root = ./documentation;
+
+        # Lint gate: alejandra (format), statix (anti-patterns), deadnix (dead
+        # bindings). Runs inside `nix flake check`, so CI fails on findings.
+        # Source is filtered to .nix files so manifest changes don't
+        # invalidate the check and secrets never enter this closure.
+        # Plus per-environment Flux manifest rendering — fails `nix flake
+        # check` on broken manifests.
+        checks =
+          {
+            lint =
+              pkgs.runCommand "lint" {
+                nativeBuildInputs = with pkgs; [alejandra statix deadnix];
+              } ''
+                cd ${lib.sources.sourceFilesBySuffices self [".nix"]}
+                alejandra --check .
+                statix check .
+                deadnix --fail .
+                touch $out
+              '';
+          }
+          // lib.genAttrs envNames mkKustomizeCheck;
+
+        packages = lib.genAttrs envNames mkKustomizeCheck;
+
+        devShells.default = pkgs.mkShell {
+          packages = with pkgs; [
             pnpm_10
             nodejs_22
             bun
             bash
             jq
             yq
-            mongodb-compass
-            kompose
+            kubectl
             kubeseal
             kustomize
-            dive
-            k3s
-            k3d
+            kubernetes-helm
+            oras
+            crane
+            fluxcd
             deadnix
             statix
             alejandra
           ];
 
-          # Environment variables
           env = {
             NODE_ENV = "development";
             HOST = "0.0.0.0";
           };
 
-          # A hook run every time you enter the environment
           shellHook = ''
             export REPO_ROOT
             REPO_ROOT=$(git rev-parse --show-toplevel)
@@ -114,16 +103,6 @@
             echo "Enjoy! Payload-CMS"
           '';
         };
-      });
-
-    packages = forEachSupportedSystem ({pkgs}: (mkKustomizeOutputs pkgs) // (mkOciOutputs pkgs));
-
-    apps = forEachSupportedSystem ({pkgs}: let
-      system = pkgs.stdenv.hostPlatform.system;
-    in {
-      inherit (kube-infra.apps."${system}") seal-env;
+      };
     });
-
-    checks = forEachSupportedSystem ({pkgs}: mkKustomizeOutputs pkgs);
-  };
 }

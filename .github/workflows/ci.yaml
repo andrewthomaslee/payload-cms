@@ -1,11 +1,9 @@
-name: CI
+name: ci
 
 on:
-  push:
-    branches: ['**']
+  workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
@@ -14,18 +12,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.2
-        with:
-          persist-credentials: true
 
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
-
-      - name: Flake Checker
-        uses: DeterminateSystems/flake-checker-action@main
-        with:
-          check-owner: false
-          check-supported: false
-          fail-mode: false
 
       - name: Nix Flake Check
         run: nix flake check --show-trace
