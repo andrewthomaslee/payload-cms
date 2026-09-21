@@ -87,6 +87,10 @@
             kustomize
             dive
             k3s
+            k3d
+            deadnix
+            statix
+            alejandra
           ];
 
           # Environment variables
